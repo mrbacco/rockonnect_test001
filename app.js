@@ -7,32 +7,32 @@ email: x18147518@student.ncirl.ie
 // definition of the constants to use in the main "app" which is the server side
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const path = require("path");
-const mongoose = require("mongoose");
 const app = express(); //initialization of the application definition of the constant app
 const mongo = require('mongodb'); // constant for the databse 
+const path = require("path");
+const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const flash = require("connect-flash");
-//const socket_io = require("socket.io"); //to enable bidirectional communitcation between client and server
-//const shortid = require("shortid");
-//const async = require('async');
 const router = express.Router();
 const fs = require('fs');
 const bodyParser = require("body-parser");
 const multer = require("multer");
+const GStorage = require("multer-gridfs-storage");
+const GStream = require("gridfs-stream");
+const mOver = require("method-override");
 const session = require("express-session");
 const validator = require("express-validator"); //for session validation
 const cookiep = require("cookie-parser");
 const passport = require("passport");
 
-
 //var pop = require("popups"); // for message on the UI
 require("./config/passport")(passport);
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json()); //body parser middleware
 app.use(passport.initialize()); //passport middleware
 app.use(cookiep());
+app.use(mOver("_method")); //using query string to create the form for delete
 
 app.use(session({ // using session for passport middleware
     secret: "supersecretsecret", // secret for session cookies
@@ -45,11 +45,19 @@ app.use(passport.session());
 app.use(flash());
 
 //########### DB stuff START ###########
-
 const conn = require('./config/dbase').mongoURI;
 mongoose.connect(conn, { useNewUrlParser: true })
-    .then(() => console.log("conncetion to mongodb+srv://mrbacco:mongodb001@cluster0-goutv.mongodb.net/users?retryWrites=true&w=majority established"))
+    .then(() => console.log("conncetion to " + db + " established"))
     .catch(err => console.log(err));
+/*
+conn.once("open", () => { //connection to db for storage using gstream code [...a bit refactored]
+    var gfs = GStream(conn.db, mongoose.mongo);
+    gfs.collection("users");
+});
+*/
+
+
+
 
 //########### DB stuff end ###########
 
@@ -97,7 +105,10 @@ const storage = multer.diskStorage({ //using multer library for upload
     }
 });
 
-const upload = multer({ storage: storage }).single("img"); //using this variable for single image upload only
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 100000 } //setting a limit for the filesize
+}).single("img"); //using this variable for single image upload only
 
 app.post('/upload', (req, res) => { // route to upload the images
     upload(req, res, (err) => { //calling the upload method define before
@@ -105,8 +116,10 @@ app.post('/upload', (req, res) => { // route to upload the images
             res.render('forum_add', { error1: true }),
                 console.log("file not uploaded...");;
         } else {
-            console.log("file uploaded, thanks" + req.file),
-                res.send("File Uploaded, thanks");
+            res.render("home"), {
+                file: `uploads/${req.file.filename}`
+            }
+            console.log("file uploaded, thanks" + req.file);
         }
     });
 });
