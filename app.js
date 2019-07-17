@@ -62,22 +62,6 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "static")));
 app.set("view engine", "pug");
 
-//########### STORAGE stuff START ###########
-
-const storage = multer.diskStorage({ //using multer library for upload
-    destination: "./static/uploads/",
-    filename: function(req, file, cb) {
-        cb(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname),
-            console.log("file is created"))
-    }
-});
-
-const upload = multer({ storage: storage }).single("myImage"); //using this variable for single image upload only
-
-//########### STORAGE stuff END ###########
-
-
-
 //########### Routers START###########
 router.get("/", function(req, res) { //this is not used, the one in router is used
     session = req.ression //session from express
@@ -103,10 +87,19 @@ app.use('/index', usersRouter);
 
 //########### Routers END ###########
 
+//########### STORAGE stuff START ###########
 
-//########### USING Storage START ###########
+const storage = multer.diskStorage({ //using multer library for upload
+    destination: "./static/uploads/",
+    filename: function(req, file, cb) {
+        cb(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname),
+            console.log("file is created"))
+    }
+});
 
-app.post('/upload', (req, res) => {
+const upload = multer({ storage: storage }).single("img"); //using this variable for single image upload only
+
+app.post('/upload', (req, res) => { // route to upload the images
     upload(req, res, (err) => { //calling the upload method define before
         if (err) {
             res.render('forum_add', { error1: true }),
@@ -123,7 +116,7 @@ app.post('/upload', (req, res) => {
     });
 });
 
-//########### USING Storage END ###########
+//########### STORAGE stuff END ###########
 
 
 
