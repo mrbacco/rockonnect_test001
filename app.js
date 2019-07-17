@@ -105,13 +105,8 @@ app.post('/upload', (req, res) => { // route to upload the images
             res.render('forum_add', { error1: true }),
                 console.log("file not uploaded...");;
         } else {
-            if (req.file == undefined) {
-                res.render('forum_add', { error1: true }),
-                    console.log("file not uploaded, define a neame please");
-            } else {
-                console.log("file uploaded, thanks" + req.file),
-                    res.send("File Uploaded, thanks");
-            }
+            console.log("file uploaded, thanks" + req.file),
+                res.send("File Uploaded, thanks");
         }
     });
 });
