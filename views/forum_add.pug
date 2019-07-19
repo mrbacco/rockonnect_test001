@@ -12,7 +12,7 @@ block content
                 h2 welcome #{user.username} !
             
                 // add thread form
-                form(action='/forum', method='POST')
+                form(action='/forum', method='POST', enctype='multipart/form-data')
                     if user
                     div.form-group 
                       label(for='user') user: 
@@ -31,13 +31,4 @@ block content
                           input(name='img', type='file')
                         .file-path-wrapper
                     button.btn.btn-primary(type='submit') Post thread
-                .row
-                    form(action='/upload', method='POST', enctype='multipart/form-data')
-                      .file-field.input-field
-                        .btn.grey
-                          span File
-                          input(name='img', type='file')
-                        .file-path-wrapper
-                          
-                      button.btn.btn-primary(type='submit') Upload image
                       

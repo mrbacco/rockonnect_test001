@@ -440,6 +440,16 @@ app.post("/forum", upload, (req, res) => { //posting a new thread, this should b
             }
 
         });
+        upload(req, res, (err) => { //calling the upload method define before
+            if (err) {
+                console.log("file not uploaded...");;
+            } else {
+                console.log("file uploaded, thanks" + req.file);
+            }
+        });
+
+
+
     });
     res.render("home");
 });
