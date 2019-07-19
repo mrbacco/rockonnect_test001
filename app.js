@@ -88,11 +88,11 @@ app.use('/index', usersRouter);
 
 //########### STORAGE stuff START ###########
 
-const storage = multer.diskStorage({ //using multer library for upload renaming the file with timestamp to make it unique
+const storage = multer.diskStorage({
     destination: "./static/uploads/",
     filename: function(req, file, call_b) {
-        call_b(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname),
-            console.log("file is created"))
+        call_b(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname), //using multer library for upload renaming the file with timestamp to make it unique
+            console.log("file is created with name " + file.fieldname + "_" + Date.now() + path.extname(file.originalname)))
     }
 });
 
@@ -207,8 +207,9 @@ app.get("/threads_list/:id", function(req, res) { //same code as above for threa
         if (err) {
             console.log(err)
         } else {
-            res.render("threads_list", {
-                thread: newThread //showing the selected thread profile
+            res.render("threads_list", { //showing the selected thread profile
+                thread: newThread,
+                image: req.file
             });
             console.log("bravo bacco, showing " + newThread.title + " now under /threads_list/");
             return;
@@ -409,7 +410,7 @@ app.post("/forum", upload, (req, res) => { //posting a new thread, this should b
         user,
         title,
         content,
-        image
+        image: req.file.path
     };
     var newThread = new Thread(threadBody); //definition of a new thread from the class object
     var MongoClient = require('mongodb').MongoClient;
@@ -425,16 +426,14 @@ app.post("/forum", upload, (req, res) => { //posting a new thread, this should b
             } else {
                 console.log("under thread page now, new thread " + newThread.title + " has been created");
             }
-
+            upload(req, res, (err) => { //calling the upload method define before
+                if (err) {
+                    console.log("file not uploaded...");;
+                } else {
+                    console.log("file " + req.file + " uploaded, thanks ");
+                }
+            });
         });
-        upload(req, res, (err) => { //calling the upload method define before
-            if (err) {
-                console.log("file not uploaded...");;
-            } else {
-                console.log("file uploaded, thanks" + req.file.path);
-            }
-        });
-
 
 
     });
