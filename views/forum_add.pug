@@ -23,6 +23,13 @@ block content
                     div.form-group
                       label(for='content') content:
                       textarea#content.form-control(type='text' name='content')
+                    div.form-group
+                      label(for='content') image:
+                      .file-field.input-field
+                        .btn.grey
+                          span File
+                          input(name='img', type='file')
+                        .file-path-wrapper
                     button.btn.btn-primary(type='submit') Post thread
                 .row
                     form(action='/upload', method='POST', enctype='multipart/form-data')
@@ -31,6 +38,6 @@ block content
                           span File
                           input(name='img', type='file')
                         .file-path-wrapper
-                          input.file-path.validate(type='text')
+                          
                       button.btn.btn-primary(type='submit') Upload image
                       

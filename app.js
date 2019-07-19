@@ -49,15 +49,6 @@ const conn = require('./config/dbase').mongoURI;
 mongoose.connect(conn, { useNewUrlParser: true })
     .then(() => console.log("conncetion to " + db + " established"))
     .catch(err => console.log(err));
-/*
-conn.once("open", () => { //connection to db for storage using gstream code [...a bit refactored]
-    var gfs = GStream(conn.db, mongoose.mongo);
-    gfs.collection("users");
-});
-*/
-
-
-
 
 //########### DB stuff end ###########
 
@@ -99,8 +90,8 @@ app.use('/index', usersRouter);
 
 const storage = multer.diskStorage({ //using multer library for upload
     destination: "./static/uploads/",
-    filename: function(req, file, cb) {
-        cb(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname),
+    filename: function(req, file, call_b) {
+        call_b(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname),
             console.log("file is created"))
     }
 });
@@ -110,19 +101,21 @@ const upload = multer({
     limits: { fileSize: 100000 } //setting a limit for the filesize
 }).single("img"); //using this variable for single image upload only
 
+// upload to mongodb function to use when uploading the threads [uploading an image is optional in threads]
 app.post('/upload', (req, res) => { // route to upload the images
     upload(req, res, (err) => { //calling the upload method define before
         if (err) {
             res.render('forum_add', { error1: true }),
                 console.log("file not uploaded...");;
         } else {
-            res.render("home"), {
-                file: `uploads/${req.file.filename}`
-            }
+            res.render("home"), {}
             console.log("file uploaded, thanks" + req.file);
         }
     });
 });
+
+
+
 
 //########### STORAGE stuff END ###########
 
@@ -418,52 +411,20 @@ app.get("/forum_add", function(req, res, next) {
 */
 
 //route to get the forum_add page 
-app.post("/forum_add", (req, res) => { //posting a new thread, this should be a protected view visible only after login
+app.post("/forum", upload, (req, res) => { //posting a new thread, this should be a protected view visible only after login
     var {
         user,
         title,
-        content
+        content,
+        image
     } = req.body; //deconstructing again!!!
     var threadBody = {
         user,
         title,
-        content
+        content,
+        image
     };
     var newThread = new Thread(threadBody); //definition of a new thread from the class object
-    var MongoClient = require('mongodb').MongoClient;
-    var url = "mongodb+srv://mrbacco:mongodb001@cluster0-goutv.mongodb.net/users?retryWrites=true";
-
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("users");
-        dbo.collection("threads").insertOne(newThread, function(err, res, next) {
-            if (err) {
-                console.log(err + " what error is sthis");
-                return;
-            } else {
-                console.log("under thread page now, new thread " + newThread.title + " has been created");
-            }
-
-        });
-    });
-    res.render("forum");
-});
-
-
-// forum threads post new threads
-app.post("/forum", (req, res) => { //posting a new thread
-    var {
-        user,
-        title,
-        content
-    } = req.body; //deconstructing again!!!
-    var threadBody = {
-        user,
-        title,
-        content
-    };
-    var newThread = new Thread(threadBody); //definition of a new thread from the class object
-    //newThread.user = req.isAuthenticated.username;
     var MongoClient = require('mongodb').MongoClient;
     var url = "mongodb+srv://mrbacco:mongodb001@cluster0-goutv.mongodb.net/users?retryWrites=true";
 
@@ -482,6 +443,10 @@ app.post("/forum", (req, res) => { //posting a new thread
     });
     res.render("home");
 });
+
+
+// forum threads post new threads
+
 
 //logout abd destroy the session for the authenticated user with passport
 app.get("/users/signout", (req, res) => {
