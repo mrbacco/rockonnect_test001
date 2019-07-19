@@ -88,7 +88,7 @@ app.use('/index', usersRouter);
 
 //########### STORAGE stuff START ###########
 
-const storage = multer.diskStorage({ //using multer library for upload
+const storage = multer.diskStorage({ //using multer library for upload renaming the file with timestamp to make it unique
     destination: "./static/uploads/",
     filename: function(req, file, call_b) {
         call_b(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname),
@@ -101,21 +101,8 @@ const upload = multer({
     limits: { fileSize: 100000 } //setting a limit for the filesize
 }).single("img"); //using this variable for single image upload only
 
-// upload to mongodb function to use when uploading the threads [uploading an image is optional in threads]
-app.post('/upload', (req, res) => { // route to upload the images
-    upload(req, res, (err) => { //calling the upload method define before
-        if (err) {
-            res.render('forum_add', { error1: true }),
-                console.log("file not uploaded...");;
-        } else {
-            res.render("home"), {}
-            console.log("file uploaded, thanks" + req.file);
-        }
-    });
-});
-
-
-
+// upload to mongodb function to use when uploading the threads [uploading an image is optional in threads
+// calling the upload function when uploading the threads, please see under forum_add post function below]
 
 //########### STORAGE stuff END ###########
 
@@ -410,7 +397,7 @@ app.get("/forum_add", function(req, res, next) {
 });
 */
 
-//route to get the forum_add page 
+//route to get the forum_add page and update the threads
 app.post("/forum", upload, (req, res) => { //posting a new thread, this should be a protected view visible only after login
     var {
         user,
@@ -444,7 +431,7 @@ app.post("/forum", upload, (req, res) => { //posting a new thread, this should b
             if (err) {
                 console.log("file not uploaded...");;
             } else {
-                console.log("file uploaded, thanks" + req.file);
+                console.log("file uploaded, thanks" + req.file.path);
             }
         });
 
