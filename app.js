@@ -440,9 +440,7 @@ app.post("/forum", upload, (req, res) => { //posting a new thread, this should b
     res.render("home");
 });
 
-
 // forum threads post new threads
-
 
 //logout abd destroy the session for the authenticated user with passport
 app.get("/users/signout", (req, res) => {
